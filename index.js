@@ -1,6 +1,9 @@
+const nconf = require('nconf');
 const Express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db');
+
+nconf.file('.env.json');
 
 const app = Express();
 app.use(bodyParser.json());
@@ -21,6 +24,8 @@ const isValidSaveRequest = (req, res, next) => {
   }
   return next();
 };
+
+app.get('/api/notification-public-key/', (req, res) => res.send({ publicKey: nconf.get('publicKey') }));
 
 app.post('/api/save-subscription/', isValidSaveRequest, function (req, res) {
   return db.saveSubscription(req.body)
