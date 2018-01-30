@@ -1,9 +1,22 @@
 const nconf = require('nconf');
 const Express = require('express');
 const bodyParser = require('body-parser');
+const webpush = require('web-push');
+const Promise = require('bluebird');
 const db = require('./db');
+const initPush = require('./push');
 
 nconf.file('.env.json');
+const publicKey = nconf.get('publicKey');
+const privateKey = nconf.get('privateKey');
+
+webpush.setVapidDetails(
+  'http://example.org',
+  publicKey,
+  privateKey,
+);
+
+const push = initPush(webpush);
 
 const app = Express();
 app.use(bodyParser.json());
@@ -25,7 +38,7 @@ const isValidSaveRequest = (req, res, next) => {
   return next();
 };
 
-app.get('/api/notification-public-key/', (req, res) => res.send({ publicKey: nconf.get('publicKey') }));
+app.get('/api/notification-public-key/', (req, res) => res.send({ publicKey }));
 
 app.post('/api/save-subscription/', isValidSaveRequest, function (req, res) {
   return db.saveSubscription(req.body)
@@ -45,8 +58,19 @@ app.post('/api/save-subscription/', isValidSaveRequest, function (req, res) {
     });
 });
 
-app.get('/example/notify', function(req, res) {
-  return res.send({});
+app.post('/example/notify', function(req, res) {
+  const dataToSend = req.body || {
+    notification: {
+      title: 'Ahoy!',
+      body: 'Call me Ishmael',
+      icon: '/teacher.png',
+    },
+  };
+  return db.getSubscriptions()
+    .then(function(subscriptions) {
+      return Promise.map(subscriptions, (subscription) => push.triggerMessage(subscription, JSON.stringify(dataToSend)))
+        .then(() => res.sendStatus(200));
+    });
 });
 
 db.init()
