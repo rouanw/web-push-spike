@@ -59,13 +59,7 @@ app.post('/api/save-subscription/', isValidSaveRequest, function (req, res) {
 });
 
 app.post('/example/notify', function(req, res) {
-  const dataToSend = {
-    notification: {
-      title: 'Ahoy!',
-      body: 'Call me Ishmael',
-      icon: '/teacher.png',
-    },
-  };
+  const dataToSend = req.body;
   return db.getSubscriptions()
     .then(function(subscriptions) {
       return Promise.map(subscriptions, ({ subscription }) => push.triggerMessage(subscription, JSON.stringify(dataToSend)))
