@@ -13,7 +13,7 @@ const init = () =>
 
 const saveSubscription = (subscription) =>
   db.collection('subscriptions')
-    .update({ endpoint: subscription.endpoint }, subscription, { upsert: true });
+    .update({ endpoint: subscription.endpoint }, { subscription }, { upsert: true });
 
 const getSubscriptions = () => db.collection('subscriptions').find({}).toArray();
 

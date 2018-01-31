@@ -68,7 +68,7 @@ app.post('/example/notify', function(req, res) {
   };
   return db.getSubscriptions()
     .then(function(subscriptions) {
-      return Promise.map(subscriptions, (subscription) => push.triggerMessage(subscription, JSON.stringify(dataToSend)))
+      return Promise.map(subscriptions, ({ subscription }) => push.triggerMessage(subscription, JSON.stringify(dataToSend)))
         .then(() => res.sendStatus(200));
     });
 });
