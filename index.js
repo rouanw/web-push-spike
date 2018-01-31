@@ -59,7 +59,7 @@ app.post('/api/save-subscription/', isValidSaveRequest, function (req, res) {
 });
 
 app.post('/example/notify', function(req, res) {
-  const dataToSend = req.body || {
+  const dataToSend = {
     notification: {
       title: 'Ahoy!',
       body: 'Call me Ishmael',
